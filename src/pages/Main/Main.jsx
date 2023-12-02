@@ -6,6 +6,8 @@ import NewsList from '../../components/NewsList/NewsList';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import Pagination from '../../components/Pagination/Pagination';
 import Categories from '../../components/Categories/Categories';
+import Search from '../../components/Search/Search';
+import { useDebounce } from '../../components/helpers/hooks/useDebounce';
 
 const Main = () => {
     const [news, setNews] = useState([])
@@ -15,6 +17,9 @@ const Main = () => {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const totalPages = 10;
     const pageSize = 10;
+    const [keywords, setKeywords] = useState('')
+
+    const debouncedKeywords = useDebounce(keywords, 1500)
 
     const fetchNews = async (currentPage) => {
         try {
@@ -22,7 +27,8 @@ const Main = () => {
             const response = await getNews({
                 page_number: currentPage,
                 page_size: pageSize,
-                category: selectedCategory === "All" ? null : selectedCategory
+                category: selectedCategory === "All" ? null : selectedCategory,
+                keywords: debouncedKeywords,
             });
             // console.log(news);
             setNews(response.news);
@@ -51,7 +57,7 @@ const Main = () => {
 
     useEffect(() => {
         fetchNews(currentPage);
-    }, [currentPage, selectedCategory])
+    }, [currentPage, selectedCategory, debouncedKeywords])
 
     
 
@@ -69,9 +75,12 @@ const Main = () => {
         setCurrentPage(pageNumber);
     }
 
+    // console.log(keywords);
+
     return (
         <main className={styles.main}>
             <Categories categories={categories} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+            <Search keywords={keywords} setKeywords={setKeywords} />
 
             {news.length > 0 && !isLoading ? <NewsBanner item={news[0]} /> : <Skeleton type={'banner'} count={1} />}
             <Pagination handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage} handlePageClick={handlePageClick} totalPages={totalPages} currentPage={currentPage}/>
