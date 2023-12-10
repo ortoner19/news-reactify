@@ -1,0 +1,79 @@
+Добавляєм пошук і дебанус (затримку пошукового запиту)
+
+в Апі запит добавили keywords
+
+export const getNews = async ({
+  page_number = 1,
+  page_size = 10,
+  category,
+  keywords
+}) => {
+  try {
+
+    const response = await axios.get(`${BASE_URL}search`, {
+      params: {
+        apiKey: API_KEY,
+        page_number,
+        page_size,
+        category,
+        keywords,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+В Main 
+const [keywords, setKeywords] = useState('')
+ниже в фетч запит добавили keywords: debouncedKeywords
+
+
+
+
+Создали компоненту Search
+
+const Search = ({ keywords, setKeywords }) => {
+    return (
+        <div className={styles.search}>
+            <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} className={styles.input} placeholder="Javascript" />
+        </div>  // value={keywords}  означає контрольований інпут
+    )
+}
+export default Search;
+
+В Main
+<Search keywords={keywords} setKeywords={setKeywords} />
+console.log(keywords);
+
+В логу показує шо ми ввели в інпуті.. далі треба дебаунс, шоб не було купа запитів по сімволу
+
+В папці hooks создали useDebounce
+
+import { useEffect, useState } from "react";
+
+export const useDebounce = (value, delay) => {
+  const [debounceValue, setDebounceValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebounceValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);  // тіпа отписуємся
+    };
+  }, [value, delay]);
+
+  return debounceValue;  // значення після затримки отримуєм для використання
+};
+
+В Main
+
+const debouncedKeywords = useDebounce(keywords, 1500)  // keywords іде со стейта
+
+    useEffect(() => {
+        fetchNews(currentPage);
+    }, [currentPage, selectedCategory, debouncedKeywords])  // debouncedKeywords замінили з просто keywords
+ 

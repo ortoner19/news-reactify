@@ -1,0 +1,212 @@
+Рефакторінг..
+сложно.. дофіга чого переробили
+
+константи в Main винесли в імпорт import { PAGE_SIZE, TOTAL_PAGES } from '../../components/constants/constants'; 
+
+export const TOTAL_PAGES = 10;  // кількість сторінок і кількість елементів на сторінці
+export const PAGE_SIZE = 10;
+
+Ці константи прокідувались в фетч запит в Меін, також пропсами прокідувались в Пагінацію; також константи були в функціях переключателях в пагінації
+
+Далі в Меін треба було переробити Нюзбаннер {news.length > 0 && !isLoading ? <NewsBanner item={news[0]} /> : <Skeleton type={'banner'} count={1} />} 
+а також НюзЛіст {!isLoading ? <NewsList news={news} /> : <Skeleton type={'item'} count={10} />} 
+Для цього создали файл hoc WithSkeleton.js
+
+Короче суть в тому шо у нас була функція тіпа або Ньюзбаннер або скєлєтон грузиться.. а тепер це одна функція, оцей вона, яка приймає в себе компонєнту, тіп (баннер або скєлєтон), ну і кількість
+
+import Skeleton from "../../Skeleton/Skeleton"
+function withSkeleton(Component, type, count) {
+    return function WithSkeleton(props) {
+        const { isLoading, ...restProps } = props  // витягуєм загрузку з пропсов
+        if (isLoading) {
+            return <Skeleton type={type} count={count} /> 
+        }
+        return <Component {...restProps} />  // якщо загрузкі немає, то наша компонента (ньюзбаннер).. restProps - це всі пропси крім isLoading, який використовується тільки для Скєлєтона
+    }
+}
+
+export default withSkeleton;
+
+Далі зайшли в компоненту Ньюзбаннер і переробили конст і експорт
+
+const NewsBannerWithSkeleton = withSkeleton(NewsBanner, 'banner', 1)  // прийняли старий ньюзбаннер, друге це тіп, який приймається више в компоненті із скелєтоном і кількість 1
+
+export default NewsBannerWithSkeleton;
+
+Далі зайшли в компоненту NewsList  і те саме зробили 
+
+const NewsListWithSkeleton = withSkeleton(NewsList, 'item', 10)
+export default NewsListWithSkeleton;
+
+Також в тих двух компонентах імпортірувався WithSkelton import withSkeleton from '../helpers/hocs/withSkeleton'; тіпа в Мені не треба було імпорт цього робить.. то в середині компонент відбувалось
+
+Стало в Меін тепер
+<NewsBanner isLoading={isLoading} item={data && data.news && data.news[0]} />  // отут ще припис дата зробився.. оця дата це в файлі юзФетч.. data установили стейтом result фетч запита.. і цей результат на експорт
+<NewsList isLoading={isLoading} news={data?.news} />
+
+--
+Далі создали в папці хелперс useFetch хук
+
+import { useEffect, useState } from "react";
+
+export const useFetch = (fetchFunction, params) => {
+  const [data, setData] = useState(null);
+  const [isLoading, setIsloading] = useState(true);
+  const [error, setError] = useState(null);
+
+    const stringParams = params ? new URLSearchParams(params).toString() : '';  // як я поняв якщо не нашло чогось по заданим параметрам, то новий фетч запит рандомний по ці новості..
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setIsloading(true);
+        const result = await fetchFunction(params);
+        setData(result);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsloading(false);
+      }
+    })();
+  }, [fetchFunction, stringParams]);
+
+  return {data, isLoading, error}
+};
+
+Тепер в Меін переробили фетчзапит на
+
+const { data, isLoading } = useFetch(getNews, {  // оцей фетч ссилається уже на getNews, який в файлы  ApiNews
+        ...filters,
+        keywords: debouncedKeywords,
+    })
+
+А БУЛО:
+    // const fetchNews = async (currentPage) => {
+    // try {
+    //     setIsLoading(true);
+    //     const response = await getNews({
+    //         page_number: currentPage,
+    //         page_size: PAGE_SIZE,
+    //         category: selectedCategory === "All" ? null : selectedCategory,
+    //         keywords: debouncedKeywords,
+    //     });
+    //     // console.log(news);
+    //     setNews(response.news);
+    //     setIsLoading(false)
+    // }
+    // catch (error) {
+    //     console.log(error);
+    // }
+    // };
+
+убрали  // const [news, setNews] = useState([])
+
+В АПІ НЬЮЗ БУЛО
+
+export const getNews = async ({
+  page_number = 1,
+  page_size = 10,
+  category,
+  keywords
+}) => {
+  try {
+    // const response = await axios.get(`${BASE_URL}latest-news`, {
+    const response = await axios.get(`${BASE_URL}search`, {
+      params: {
+        apiKey: API_KEY,
+        page_number,
+        page_size,
+        category,
+        keywords,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+Далі ми задокументірували категорії
+    // const fetchCategories = async () => {
+    //     try {
+    //         const response = await getCategories();
+    //         setCategories(["All", ...response.categories]);
+    //     }
+    //     catch (error) {
+    //         console.log(error);
+    //     }
+    // };
+    // console.log(categories);
+
+    // useEffect(() => {
+    //     fetchCategories();
+    // }, []);
+
+і оставили без нічого функцію     const { data: dataCategories } = useFetch(getCategories, {
+
+    })  // воно ссилається на getCategories в АпіНьюз
+
+також задокументірували
+
+    // useEffect(() => {
+    //     fetchNews(currentPage);
+    // }, [currentPage, selectedCategory, debouncedKeywords])
+
+також     // const [categories, setCategories] = useState([]);
+
+переробили в Меін на
+ {dataCategories ? <Categories categories={dataCategories.categories} selectedCategory={filters.category} setSelectedCategory={(category) => changeFilter('category', category)} /> : null}
+
+де dataCategories бере з юзфетча по АпіНьюз файлу
+
+
+Далі в Меін була задача убрать оце:
+const [currentPage, setCurrentPage] = useState(1);
+const [selectedCategory, setSelectedCategory] = useState('All');
+const [keywords, setKeywords] = useState('')
+
+в ітогі замінили отак:
+    const { data, isLoading } = useFetch(getNews, {
+        // page_number: currentPage,
+        // page_size: PAGE_SIZE,
+        // category: selectedCategory === "All" ? null : selectedCategory,
+        ...filters,  // оце добавили замість отого
+        keywords: debouncedKeywords,
+    })
+
+
+Создали фільтри.. спочатку писали в Меіні, далі файл use.Felters  зробили, ось файл:
+import { useState } from "react";
+
+export const useFilters = (initialFilters) => {
+  const [filters, setFilters] = useState(initialFilters);
+
+  const changeFilter = (key, value) => {
+    setFilters((prev) => {
+      return { ...prev, [key]: value };
+    });
+  };
+  return  { filters, changeFilter } 
+};
+
+Далі як написали той фільтр файл в Меін його отримали:
+    const { filters, changeFilter } = useFilters({
+        page_number: 1,
+        page_size: PAGE_SIZE,
+        category: null,
+        keywords: '',
+    })
+
+
+В Меін переробили:
+const debouncedKeywords = useDebounce(filters.keywords, 1500) // приставку filters зробили
+Там де було page_number переробили на filters.page_number
+
+В функціх переключателях сторінок було
+// setCurrentPage(filters.page_number + 1)
+
+Стало  changeFilter('page_number', filters.page_number + 1)
+
+Пропси переписали на selectedCategory={filters.category}  ; keywords={filters.keywords}  ; currentPage={filters.page_number} 
+
+переписали також Сьорч пропси.. <Search keywords={filters.keywords} setKeywords={(keywords) => changeFilter('keywords', keywords)} />
