@@ -144,7 +144,21 @@ export const getNews = async ({
 
 і оставили без нічого функцію     const { data: dataCategories } = useFetch(getCategories, {
 
-    })  // воно ссилається на getCategories в АпіНьюз
+    })  // воно ссилається на getCategories в АпіНьюз ось
+
+export const getCategories = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}available/categories`, {
+      params: {
+        apiKey: API_KEY,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 також задокументірували
 
@@ -183,14 +197,14 @@ export const useFilters = (initialFilters) => {
 
   const changeFilter = (key, value) => {
     setFilters((prev) => {
-      return { ...prev, [key]: value };
+      return { ...prev, [key]: value };  // ключ це нове значення.. категорії чи сторінки тіпа
     });
   };
   return  { filters, changeFilter } 
 };
 
 Далі як написали той фільтр файл в Меін його отримали:
-    const { filters, changeFilter } = useFilters({
+    const { filters, changeFilter } = useFilters({   // це той самий стейт токо імпортіруваний з файла useFilters...
         page_number: 1,
         page_size: PAGE_SIZE,
         category: null,
@@ -205,7 +219,7 @@ const debouncedKeywords = useDebounce(filters.keywords, 1500) // пристав�
 В функціх переключателях сторінок було
 // setCurrentPage(filters.page_number + 1)
 
-Стало  changeFilter('page_number', filters.page_number + 1)
+Стало  changeFilter('page_number', filters.page_number + 1)  // це ми на об'єкт уверху меіна в стейті ссилаємось
 
 Пропси переписали на selectedCategory={filters.category}  ; keywords={filters.keywords}  ; currentPage={filters.page_number} 
 

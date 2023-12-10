@@ -11,6 +11,8 @@ import { useDebounce } from '../../components/helpers/hooks/useDebounce';
 import { PAGE_SIZE, TOTAL_PAGES } from '../../components/constants/constants';
 import { useFetch } from '../../components/helpers/hooks/useFetch';
 import { useFilters } from '../../components/helpers/hooks/useFilters';
+import LatestNews from '../../components/LatestNews/LatestNews';
+import NewsByFilters from '../../components/NewsByFilters/NewsByFilters';
 
 const Main = () => {
     const { filters, changeFilter } = useFilters({
@@ -40,9 +42,7 @@ const Main = () => {
         keywords: debouncedKeywords,
     })
 
-    const { data: dataCategories } = useFetch(getCategories, {
-
-    })
+    // const { data: dataCategories } = useFetch(getCategories);
 
 
 
@@ -84,47 +84,45 @@ const Main = () => {
     //     fetchNews(currentPage);
     // }, [currentPage, selectedCategory, debouncedKeywords])
 
-  
 
 
-    const handleNextPage = () => {
-        // if (currentPage < TOTAL_PAGES) {
-        if (filters.page_number < TOTAL_PAGES) {
-            // setCurrentPage(currentPage + 1)
-            // setCurrentPage(filters.page_number + 1)
-            changeFilter('page_number', filters.page_number + 1)
-        }
-    }
-    const handlePreviousPage = () => {
-        // if (currentPage > 1) {
-        //     setCurrentPage(currentPage - 1)
-        if (filters.page_number > 1) {
-            // setCurrentPage(filters.page_number - 1)
-            changeFilter('page_number', filters.page_number - 1)
-        }
-    }
-    const handlePageClick = (pageNumber) => {
-        // setCurrentPage(pageNumber);
-        changeFilter('page_Number', pageNumber)
-    }
+
+    // const handleNextPage = () => {
+    //     // if (currentPage < TOTAL_PAGES) {
+    //     if (filters.page_number < TOTAL_PAGES) {
+    //         // setCurrentPage(currentPage + 1)
+    //         // setCurrentPage(filters.page_number + 1)
+    //         changeFilter('page_number', filters.page_number + 1)
+    //     }
+    // }
+    // const handlePreviousPage = () => {
+    //     // if (currentPage > 1) {
+    //     //     setCurrentPage(currentPage - 1)
+    //     if (filters.page_number > 1) {
+    //         // setCurrentPage(filters.page_number - 1)
+    //         changeFilter('page_number', filters.page_number - 1)
+    //     }
+    // }
+    // const handlePageClick = (pageNumber) => {
+    //     // setCurrentPage(pageNumber);
+    //     changeFilter('page_Number', pageNumber)
+    // }
 
     // console.log(keywords);
 
     return (
         <main className={styles.main}>
-            {dataCategories ? <Categories categories={dataCategories.categories} selectedCategory={filters.category} setSelectedCategory={(category) => changeFilter('category', category)} /> : null}
-            <Search keywords={filters.keywords} setKeywords={(keywords) => changeFilter('keywords', keywords)} />
+            <LatestNews isLoading={isLoading} banners={data && data.news} />
+            <NewsByFilters news={data?.news} isLoading={isLoading}  filters={filters} changeFilter={changeFilter}/>
 
+            {/* {dataCategories ? <Categories categories={dataCategories.categories} selectedCategory={filters.category} setSelectedCategory={(category) => changeFilter('category', category)} /> : null} */}
+            {/* <Search keywords={filters.keywords} setKeywords={(keywords) => changeFilter('keywords', keywords)} /> */}
             {/* {news.length > 0 && !isLoading ? <NewsBanner item={news[0]} /> : <Skeleton type={'banner'} count={1} />} */}
-            <NewsBanner isLoading={isLoading} item={data && data.news && data.news[0]} />
-
-
-            <Pagination handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage} handlePageClick={handlePageClick} totalPages={TOTAL_PAGES} currentPage={filters.page_number} />
-
+            {/* <NewsBanner isLoading={isLoading} item={data && data.news && data.news[0]} /> */}
+            {/* <Pagination handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage} handlePageClick={handlePageClick} totalPages={TOTAL_PAGES} currentPage={filters.page_number} /> */}
             {/* {!isLoading ? <NewsList news={news} /> : <Skeleton type={'item'} count={10} />} */}
-            <NewsList isLoading={isLoading} news={data?.news} />
-
-            <Pagination handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage} handlePageClick={handlePageClick} totalPages={TOTAL_PAGES} currentPage={filters.page_number} />
+            {/* <NewsList isLoading={isLoading} news={data?.news} /> */}
+            {/* <Pagination handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage} handlePageClick={handlePageClick} totalPages={TOTAL_PAGES} currentPage={filters.page_number} /> */}
         </main>
     )
 }
