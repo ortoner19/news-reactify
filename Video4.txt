@@ -1,0 +1,72 @@
+Добавлєніє катєгорій
+
+в apiNews добавили
+
+
+export const getCategories = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}available/categories`, {
+      params: {
+        apiKey: API_KEY,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+в Main (потім перероблювали в наступних відео) :
+
+     const fetchCategories = async () => {
+         try {
+             const response = await getCategories();
+             setCategories(["All", ...response.categories]);  // тіпа перше All без катергорії, а дальше по запросу категорії прилітають масівом
+         }
+         catch (error) {
+             console.log(error);
+        }
+
+     useEffect(() => {
+         fetchCategories();
+     }, []);
+
+Далі в Main зробили стан
+
+const [categories, setCategories] = useState([]);
+const [selectedCategory, setSelectedCategory] = useState('All');
+
+за загрузку новин отвічає фетч getNews з минулого відоса.. туди пропсом закінули ще category (5хв відоса), в параметри закінули катеригорію там..
+також юзеффєкт слідить
+
+     useEffect(() => {
+         fetchNews(currentPage);
+     }, [currentPage, selectedCategory, debouncedKeywords])  // дебаунс поже ще добавляли..
+
+Далі создали файл Catrgories
+
+import styles from './styles.module.css'
+
+const Categories = ({ categories, setSelectedCategory, selectedCategory }) => {
+    return (
+        <div className={styles.categories}><button onClick={() => setSelectedCategory(null)} className={!selectedCategory ? styles.active : styles.item}>
+            All
+        </button>
+            {categories.map(category => {
+
+                return (
+                    <button onClick={() => setSelectedCategory(category)} className={selectedCategory === category ? styles.active : styles.item} key={category}>
+                        {category}
+                    </button>
+                )
+            })}
+        </div>
+    )
+}
+
+export default Categories;
+
+в Main 
+
+ <Categories categories={dataCategories.categories} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />

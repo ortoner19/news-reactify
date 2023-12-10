@@ -1,0 +1,146 @@
+Скєлєтон і баннер
+
+файл Скєлєтон создали
+
+
+import styles from './styles.module.css'
+
+const Skeleton = ({ count = 1, type = 'banner' }) => {  // кількість блоков 1, це главна картінка (новость). 2 тіпа: баннер і обичний item
+    return (
+        <>
+            {count > 1 ? (                           // count вроді номер по порядку чі шось тіпа того.. перший баннер, остальні айтеми
+                <ul className={styles.list}>
+                    {[...Array(count)].map((_, index) => {
+                        <li key={index} className={type === "banner" ? styles.banner : styles.item}></li>
+                    })}
+                </ul>
+            ) : <li className={type === "banner" ? styles.banner : styles.item}></li>}   // тіпа якщо елемент 1 то тільки баннер новость, а перед цим баннер + айтеми
+        </>
+    )
+}
+
+export default Skeleton;
+
+
+в стілях написали скєлєтон анімацію
+
+В Main добавили стан  const [isLoading, setIsLoading] = useState(true);
+
+
+в return в Main
+
+{news.length > 0 && !isLoading ? <NewsBanner item={news[0]} /> : <Skeleton type={'banner'} count={1} />}   // це якщо загрузкі немає показуєм баннер; count={1} це один баннер
+
+по айтемам ось скєлєтон в ретьорні: {!isLoading ? <NewsList news={news} /> : <Skeleton type={'item'} count={10} />}
+
+Уверху в Main був фетч.
+Там де try спочатку
+setIsLoading(true); потім           setNews(response.news);  setIsLoading(false)
+
+
+=======
+Відео 3
+Пагінація
+
+в Апі переробили
+    // const response = await axios.get(`${BASE_URL}latest-news`, {  тіпа щоб не тільки новини отримували, а й пошук можна було робити
+    const response = await axios.get(`${BASE_URL}search`, {
+
+--
+export const getNews = async ({
+  page_number = 1, // оце по дефолту перша сторінка і 10 елементів на сторінці і далі ниже в параметри ми це тіпа пробрасуєм і відправляємо на сєрвєр
+  page_size = 10,
+  category,  // це далі добавляли потім..
+  keywords
+}) => {
+  try {
+    const response = await axios.get(`${BASE_URL}search`, {
+      params: {
+        apiKey: API_KEY,
+        page_number,  // отут пробрасуєм і відправляємо на сєрвєр
+        page_size,
+        category,
+        keywords,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getCategories = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}available/categories`, {
+      params: {
+        apiKey: API_KEY,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+в Main
+
+const [currentPage, setCurrentPage] = useState(1); // по дефолту перша сторінка
+     const totalPages = 10;  // 10 сторінок з 10 елементами 
+     const pageSize = 10;
+
+const fetchNews = async (currentPage) => {  // оце потім багато разів перероблювали.. написав з цього відоса
+trt {
+        setIsLoading(true);
+        const response = await getNews(currentPage, PageSize);
+	setNews(response.news);
+	setLoading(false);
+} catch (error) { console.log(error); } };
+
+useEffect(() => {
+fetchNews(currentPage) ;
+} [currentPage]);
+
+Cоздали Pagination 
+
+import styles from './styles.module.css'
+
+const Pagination = ({ totalPages, handlePreviousPage, handleNextPage, handlePageClick, currentPage }) => {  // в Main ми создали ці функції, прокінули пропси там, тут витягнули
+    return (
+        <div className={styles.pagination}>
+            <button className={styles.arrow} onClick={handlePreviousPage} disabled={currentPage <= 1}>{'<'}</button>
+            <div className={styles.list}>
+                {[...Array(totalPages)].map((_, index) => {
+                    return <button key={index} className={styles.pageNumber} onClick={() => handlePageClick(index + 1)} disabled={index + 1 === currentPage}>{index + 1} </button>
+                })}  // disabled={index + 1 === currentPage} це блочіться сторінка яка тєкуща
+            </div>
+            <button className={styles.arrow} onClick={handleNextPage} disabled={currentPage >= totalPages}>{'>'}</button>
+        </div>
+    )
+}
+
+export default Pagination;
+
+Далі в Main вставили 
+
+<Pagination totalPages={totalPages} /> 
+
+Далі в Main создали переключеніє сторінок
+const handleNextPage = () => {
+if (currentPage < TOTAL_PAGES) {  // тіпа якщо менше чим взагалі сторінок то можна переключить уперед
+setCurrentPage(currentPage + 1) }}
+
+    const handlePreviousPage = () => {
+         if (currentPage > 1) {   // якщо сторінок більше 1, то назад можна
+            setCurrentPage(currentPage - 1)  } }
+
+
+І по тєкущой сторінці
+
+    const handlePageClick = (pageNumber) => {
+       setCurrentPage(pageNumber);
+    }
+
+І далі ми в Main в пагінацію пропсами ці три константи закідуєм
+
+<Pagination handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage} handlePageClick={handlePageClick} totalPages={TOTAL_PAGES} crurentPage={currentPage} />
