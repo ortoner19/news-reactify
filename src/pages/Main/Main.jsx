@@ -15,32 +15,21 @@ import LatestNews from '../../components/LatestNews/LatestNews';
 import NewsByFilters from '../../components/NewsByFilters/NewsByFilters';
 
 const Main = () => {
-    const { filters, changeFilter } = useFilters({
-        page_number: 1,
-        page_size: PAGE_SIZE,
-        category: null,
-        keywords: '',
-    })
+
 
     // const [news, setNews] = useState([])
     // const [isLoading, setIsLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
+    // const [currentPage, setCurrentPage] = useState(1);
     // const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('All');
+    // const [selectedCategory, setSelectedCategory] = useState('All');
     // const totalPages = 10;
     // const pageSize = 10;
-    const [keywords, setKeywords] = useState('')
+    // const [keywords, setKeywords] = useState('')
 
-    const debouncedKeywords = useDebounce(filters.keywords, 1500)
+    
 
     // const { data, error, isLoading } = useFetch(getNews, {
-    const { data, isLoading } = useFetch(getNews, {
-        // page_number: currentPage,
-        // page_size: PAGE_SIZE,
-        // category: selectedCategory === "All" ? null : selectedCategory,
-        ...filters,
-        keywords: debouncedKeywords,
-    })
+
 
     // const { data: dataCategories } = useFetch(getCategories);
 
@@ -112,8 +101,10 @@ const Main = () => {
 
     return (
         <main className={styles.main}>
-            <LatestNews isLoading={isLoading} banners={data && data.news} />
-            <NewsByFilters news={data?.news} isLoading={isLoading}  filters={filters} changeFilter={changeFilter}/>
+            {/* <LatestNews isLoading={isLoading} banners={data && data.news} /> */}
+            <LatestNews  />
+            {/* <NewsByFilters news={data?.news} isLoading={isLoading}  filters={filters} changeFilter={changeFilter}/> */}
+            <NewsByFilters />
 
             {/* {dataCategories ? <Categories categories={dataCategories.categories} selectedCategory={filters.category} setSelectedCategory={(category) => changeFilter('category', category)} /> : null} */}
             {/* <Search keywords={filters.keywords} setKeywords={(keywords) => changeFilter('keywords', keywords)} /> */}
