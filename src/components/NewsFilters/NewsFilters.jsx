@@ -3,6 +3,7 @@ import styles from './styles.module.css'
 import { getCategories } from '../../api/apiNews';
 import Categories from '../Categories/Categories';
 import Search from '../Search/Search';
+import Slider from '../Slider/Slider';
 
 const NewsFilters = ({ filters, changeFilter }) => {
 
@@ -10,8 +11,12 @@ const NewsFilters = ({ filters, changeFilter }) => {
 
     return (
         <div className={styles.filters}>
-            {dataCategories ? <Categories categories={dataCategories.categories} selectedCategory={filters.category} setSelectedCategory={(category) => changeFilter('category', category)} /> : null}
-            <Search keywords={filters.keywords} setKeywords={(keywords) => changeFilter('keywords', keywords)} />
+            {dataCategories ? (
+                <Slider>
+                    <Categories categories={dataCategories.categories} selectedCategory={filters.category} setSelectedCategory={(category) => changeFilter('category', category)} />
+                </Slider>
+            ) : null}
+            < Search keywords={filters.keywords} setKeywords={(keywords) => changeFilter('keywords', keywords)} />
 
         </div>
     )
