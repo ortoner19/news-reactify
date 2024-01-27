@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
-import NewsBanner from '../../components/NewsBanner/NewsBanner';
+// import { useEffect, useState } from 'react';
+// import NewsBanner from '../../components/NewsBanner/NewsBanner';
 import styles from './styles.module.css'
-import { getCategories, getNews } from '../../api/apiNews';
-import NewsList from '../../components/NewsList/NewsList';
-// import Skeleton from '../../components/Skeleton/Skeleton';
-import Pagination from '../../components/Pagination/Pagination';
-import Categories from '../../components/Categories/Categories';
-import Search from '../../components/Search/Search';
-import { useDebounce } from '../../components/helpers/hooks/useDebounce';
-import { PAGE_SIZE, TOTAL_PAGES } from '../../components/constants/constants';
-import { useFetch } from '../../components/helpers/hooks/useFetch';
-import { useFilters } from '../../components/helpers/hooks/useFilters';
+// import { getCategories, getNews } from '../../api/apiNews';
+// import NewsList from '../../components/NewsList/NewsList';
+// // import Skeleton from '../../components/Skeleton/Skeleton';
+// import Pagination from '../../components/Pagination/Pagination';
+// import Categories from '../../components/Categories/Categories';
+// import Search from '../../components/Search/Search';
+// import { useDebounce } from '../../components/helpers/hooks/useDebounce';
+// import { PAGE_SIZE, TOTAL_PAGES } from '../../components/constants/constants';
+// import { useFetch } from '../../components/helpers/hooks/useFetch';
+// import { useFilters } from '../../components/helpers/hooks/useFilters';
 import LatestNews from '../../components/LatestNews/LatestNews';
 import NewsByFilters from '../../components/NewsByFilters/NewsByFilters';
 
